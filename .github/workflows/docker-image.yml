@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ${{ vars.ALIYUN_ACR_IMAGE_NAME }}:${{ inputs.tag }}
+
+    - name: Alibaba Cloud Container Registry (ACR) Login
+    # You may pin to the exact commit or the version.
+    # uses: aliyun/acr-login@3efc58f96aaffceb553f93e74d7a79221a44ceed
+      uses: aliyun/acr-login@v1
+      with:
+        # Container registry username
+        username: ${{ vars.ALIYUN_ACR_USERNAME }}
+        # Container registry password
+        password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
+        # Region ID
+        region-id: ${{ vars.ALIYUN_ACR_REGION }}
+        # Container registry server url
+        login-server: ${{ vars.ALIYUN_ACR_REGISTRY }}
+
+    - name: Push
+      run: docker push ${{ vars.ALIYUN_ACR_IMAGE_NAME }}:${{ inputs.tag }}
